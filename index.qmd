@@ -1,0 +1,31 @@
+---
+title: "Climate Change and Vegetation Cover - Natural Bridges National Monument"
+format: html
+website:
+  back-to-top-navigation: true
+date: May 20, 2024
+page-layout: full
+theme: lumen
+bibliography: reference.bib
+toc: true
+
+---
+
+# Introduction
+
+::: {.column-screen style="background-image:url(data/images/bridge.jpg); background-size: cover; height: 37vh; position: sticky; top: 0; margin-bottom: 30px;"}
+:::
+
+The Natural Bridges National Monument is located in Utah, with beautiful natural scenery. We aim to look into the effects of climate change and how it may have affected vegetation cover in the area. Our data spans from 1980-2024, containing metrics such as average temperatures sampled across representative locations within the park, spanning annual averages and seasonal variations [@data]. Our goal is to explore the temporal trends in climate variables, particularly focusing on temperature, and assess their potential impacts on vegetation cover. Through this analysis, we hope to shed light on the changing climate patterns within the Natural Bridges National Monument and understand how they may have influenced the dynamics of vegetation over the years.
+
+# Temporal Trends
+
+# Impact of Climate Change on Vegetation Cover
+
+# Case Studies
+
+# Predictive Analysis
+
+# Conclusion
+
+hgjhg
