@@ -1,0 +1,46 @@
+---
+title: "Chord Diagram"
+output: html_notebook
+---
+
+
+
+```{r}
+
+combined_df <- read.csv('data/combined_df.csv')
+
+library(circlize)
+
+climate_vars <- c(
+    'treecanopy', 'Bare', 'Herb', 'Litter', 'Shrub',
+    'DrySoilDays_Summer_whole', 'ExtremeShortTermDryStress_Summer_whole',
+    'FrostDays_Winter', 'PPT_Winter', 'PPT_Summer',
+    'Tmax_Summer',
+    'VWC_Winter_whole', 'VWC_Spring_whole', 'VWC_Summer_whole', 'VWC_Fall_whole'
+)
+
+corr_matrix <- cor(combined_df[, climate_vars], use = "pairwise.complete.obs")
+
+new_names <- c("Canopy", "Bare", "Herb", "Litter", "Shrub", 
+               "Dry Soil Days", "Dry Stress", "Frost Days", 
+               "Winter Precip", "Summer Precip", "Max Summer T",
+               "Winter VWC", "Spring VWC", "Summer VWC", "Fall VWC")
+rownames(corr_matrix) <- new_names
+colnames(corr_matrix) <- new_names
+
+corr_long <- as.data.frame(as.table(corr_matrix))
+colnames(corr_long) <- c("Variable1", "Variable2", "Correlation")
+
+corr_long <- subset(corr_long, Correlation > 0.5 & Variable1 != Variable2)
+
+chordDiagram(corr_long, transparency = 0.5, diffHeight = 1.5)
+
+title("Relationships Between Climate Variables")
+
+par(cex = 0.5)
+
+
+
+```
+
+

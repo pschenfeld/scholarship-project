@@ -1,31 +1,371 @@
 ---
 title: "Climate Change and Vegetation Cover - Natural Bridges National Monument"
-format: html
-website:
-  back-to-top-navigation: true
+format:
+    html:
+        embed-resources: true
 date: May 20, 2024
 page-layout: full
 theme: lumen
 bibliography: reference.bib
+nocite: |
+  @folium, @scrolly, @utah, @plotly-mapbox, @xgboost, @chord
 toc: true
+execute:
+  echo: false
+grid:
+    body-width: 1100px
 
 ---
 
 # Introduction
 
-::: {.column-screen style="background-image:url(data/images/bridge.jpg); background-size: cover; height: 37vh; position: sticky; top: 0; margin-bottom: 30px;"}
+::: {.column-screen style="background-image:url(data/images/image3.jpg); background-size: cover; height: 50vh; position: sticky; top: 0; margin-bottom: 30px;"}
 :::
 
 The Natural Bridges National Monument is located in Utah, with beautiful natural scenery. We aim to look into the effects of climate change and how it may have affected vegetation cover in the area. Our data spans from 1980-2024, containing metrics such as average temperatures sampled across representative locations within the park, spanning annual averages and seasonal variations [@data]. Our goal is to explore the temporal trends in climate variables, particularly focusing on temperature, and assess their potential impacts on vegetation cover. Through this analysis, we hope to shed light on the changing climate patterns within the Natural Bridges National Monument and understand how they may have influenced the dynamics of vegetation over the years.
 
-# Temporal Trends
+
+# Data Exploration
+
+## Correlations
+
+In this correlation matrix, we aim to look at the correlation between numeric variables in the dataset. 
+
+Notable relationships:
+
+* Shrub and Litter are highly correlated (.80), implying that the more plant litter (dead plant material that has fallen to the ground), the more shrub coverage. Plant litter contains nutrients that are vital to soil fertility and nutrient recycling [@plant-litter]
+* PPT_Summer and VWC_Summer_whole are positively correlated (.89), which intuitively makes sense, as the more precipitation there is, the higher volumeric water content the soil will have.
+* ExtremeShortTermDryStress_Summer_whole and Tmax_Summer are highly correlated (.93), indicating that rising maximum temperatures in the summer are causing extreme dry stress on the soil, which in turn can affect vegetation health.
+
+```{python}
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+combined_df = pd.read_csv('data/combined_df.csv', low_memory=False)
+
+numeric_vars = combined_df.select_dtypes(include=np.number).drop(columns=['lat', 'long', 'DrySoilDays_Summer_whole'])
+
+corr_matrix = numeric_vars.corr()
+
+corr_matrix_subset = corr_matrix[['Tmax_Summer', 'Shrub', 'Herb', 'treecanopy', 'PPT_Summer', 'VWC_Summer_whole', 'ExtremeShortTermDryStress_Summer_whole']]
+
+plt.figure(figsize=(10, 8))
+sns.heatmap(corr_matrix_subset, annot=True, cmap='coolwarm', fmt=".2f", annot_kws={"size": 10})
+plt.title('Correlation Heatmap')
+plt.show()
+
+```
+
+
+::::: {.columns}
+
+:::: {.column width="35%"}
+Building off of the correlations between variables, the chord diagram on the right gives a unique visual representation of the relationships between the variables. 
+
+* Shrub, Litter, and Herb Interconnections:
+
+  * Shrub, Litter, and Herb are exclusively interconnected, suggesting a strong mutual relationship. This could indicate that these vegetation types either share similar environmental conditions or influence each other's presence and distribution. The exclusive ribbons among these variables imply a potentially cyclical or dependent relationship in the ecosystem where they coexist.
+
+* Dry Stress and Maximum Summer Temperature (Tmax_Summer):
+
+  * Dry Stress and Tmax_Summer are only connected with each other, highlighting a specific interaction. This indicates that higher maximum summer temperatures are directly linked to periods of extreme dry stress. Such a relationship emphasizes the impact of heat extremes on dry conditions, which could have significant implications for vegetation health and water resource management during the summer months.
+
+* Soil Moisture (VMC) by Season:
+
+  * The Volumetric Moisture Content (VMC) variables for different seasons (Winter, Spring, Summer, and Fall) show correlations with each other. This suggests a consistent pattern in soil moisture content across seasons, possibly influenced by long-term climatic conditions or soil properties. The inter-seasonal correlation of VMC indicates that soil moisture retention and distribution are relatively stable throughout the year, which could be crucial for understanding seasonal water availability and agricultural planning.
+::::
+
+:::: {.column width="10%"}
+::::
+
+:::: {.column width="55%" style="padding:20px; position:sticky;top:100px;background-color:#648767"}
+
+
+::: {style="background-color:white; color: white; height: 500px; text-align: center; padding: 20px;"}
+![](data/images/chord.jpeg)
+
+:::
+::::
+
+:::::
+
+
+
+## Extreme Weather Conditions
+
+The histograms below illustrate the distributions of extreme frost days in winter and extreme short-term dry stress on soil during summer, across the entire dataset from 1980-2024. The first histogram shows the distribution of FrostDays_Winter, which is slightly skewed to the right. This skewness indicates that while most winters experience a moderate number of frost days, there are a few winters with a significantly higher number of frost days. This skewness can be indicative of occasional harsh winters with extreme frost conditions.
+
+The second histogram presents the distribution of ExtremeShortTermDryStress_Summer_whole, which follows a normal distribution. This normal distribution suggests that the occurrences of extreme short-term dry stress on soil during summer are evenly distributed around a central value, with fewer instances of extremely low or extremely high dry stress. This pattern indicates a more consistent and predictable occurrence of dry stress events during summer. With predictability, the option for proactiveness arises. We can use statistical analyses to determine what causes the extreme dry stress, and how we can better prepare or prevent these events. The importance of preserving and uplifting our natural environment allows for a healthier ecosystem. 
+
+```{python}
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+color_palette = ["#00c0a7", "#44546a", "#ff6c00", "#f89da6", "#ffac01"]
+
+plt.figure(figsize=(11, 5))
+
+# Histogram for Frost Days in Winter
+plt.subplot(1, 2, 1)
+sns.histplot(combined_df['FrostDays_Winter'], kde=True, bins=30, color=color_palette[1])
+plt.title('Distribution of Frost Days in Winter')
+plt.xlabel('Number of Frost Days')
+plt.ylabel('Frequency')
+
+# Histogram for Extreme Short-Term Dry Stress in Summer
+plt.subplot(1, 2, 2)
+sns.histplot(combined_df['ExtremeShortTermDryStress_Summer_whole'], kde=True, bins=30, color=color_palette[3])
+plt.title('Distribution of Extreme Short-Term Dry Stress in Summer')
+plt.xlabel('Dry Stress Index')
+plt.ylabel('Frequency')
+
+plt.tight_layout()
+plt.show()
+
+```
+
 
 # Impact of Climate Change on Vegetation Cover
 
-# Case Studies
+## Rising Temperatures and Vegetation Cover
+
+Below we can see how the maximum temperature in the summer has steadily increased from 2018-2024, potentially attributed to climate change and global warming. In turn, the percent of vegetation coverage in the Natural Bridges National Monument as consequently decreased. You can toggle between viewing the percentage of tree canopy, shrub, and herb coverage. Each show a general decline in coverage, leading us to believe that due to rising temperatures, vegetation is unable to thrive. 
+
+```{python}
+import pandas as pd
+import plotly.graph_objects as go
+
+combined_df = pd.read_csv('data/combined_df.csv', low_memory=False)
+
+color_palette = ["#00c0a7", "#44546a", "#ff6c00", "#f89da6", "#ffac01"]
+
+temp_precip_data = combined_df[combined_df['year'] >= 2018].groupby('year')[['Tmax_Summer', 'treecanopy', 'Herb', 'Shrub']].mean().round(2).reset_index()
+
+fig = go.Figure()
+
+# Add traces for max summer temperature and tree canopy
+fig.add_trace(go.Scatter(x=temp_precip_data['year'], y=temp_precip_data['Tmax_Summer'], mode='lines+markers', name='Max Summer Temperature', line=dict(color=color_palette[4])))
+fig.add_trace(go.Scatter(x=temp_precip_data['year'], y=temp_precip_data['treecanopy'], mode='lines+markers', name='Selected Vegetation Coverage', yaxis='y2', line=dict(color=color_palette[0]), hovertemplate='%{x}: %{y}%<extra>Vegetation Cover %</extra>'))
+
+fig.update_layout(
+    title='Max Summer Temperature and Vegetation Coverage Over Years (2018-2024)',
+    xaxis=dict(title='Year'),
+    yaxis=dict(title='Max Summer Temp (°C)'),
+    yaxis2=dict(title='Vegetation Coverage (%)', overlaying='y', side='right', showgrid=False),
+    legend=dict(x=0.1, y=1, xanchor='left', yanchor='top', bgcolor='rgba(255,255,255,0.5)'),
+    updatemenus=[
+        dict(
+            buttons=[
+                dict(
+                    label='Tree Canopy',
+                    method='update',
+                    args=[{'y': [temp_precip_data['Tmax_Summer'], temp_precip_data['treecanopy']], 'yaxis2.title.text': 'Tree Canopy Coverage (%)'}]
+                ),
+                dict(
+                    label='Herb',
+                    method='update',
+                    args=[{'y': [temp_precip_data['Tmax_Summer'], temp_precip_data['Herb']], 'yaxis2.title.text': 'Herb Coverage (%)'}]
+                ),
+                dict(
+                    label='Shrub',
+                    method='update',
+                    args=[{'y': [temp_precip_data['Tmax_Summer'], temp_precip_data['Shrub']], 'yaxis2.title.text': 'Shrub Coverage (%)'}]
+                )
+            ]
+        )
+    ]
+)
+
+
+
+```
+
+## Extreme Dry Stress on Soil and Max Temperature
+
+In this map of the Natural Bridges National Monument, we can see the extreme short term dry stress for the entire soil profile in the summer, across the park. The Western and Southern sides of the park shows to have a higher stress index in the summer, with the soil profile experiencing intense dryness. The data, collected between 2021 and 2024, indicates a significant variation in dry stress across different areas of the park. This variation can be attributed to several factors, including soil composition, vegetation cover, and topography. The Western and Southern parts of the park, highlighted in darker shades of red on the map, exhibit a notably higher dry stress index, suggesting that these areas are more prone to drought conditions during the summer months.
+
+Extreme short-term dry stress is a critical parameter for understanding the health and resilience of the park's ecosystem. High levels of soil dryness can have severe impacts on plant health, water retention, and overall biodiversity. In these high-stress zones, plants may struggle to survive, leading to reduced vegetation cover and potentially increasing the vulnerability of the soil to erosion.
+
+```{python}
+import pandas as pd
+import geopandas as gpd
+import plotly.express as px
+
+utah_shapefile = gpd.read_file('data/utah/tl_2016_49_cousub.shp')
+
+filtered_df = combined_df[(combined_df['year'] >= 2021) & (combined_df['year'] <= 2024)]
+
+gdf = gpd.GeoDataFrame(
+    filtered_df, geometry=gpd.points_from_xy(filtered_df.long, filtered_df.lat)
+)
+
+gdf.crs = utah_shapefile.crs
+
+gdf = gdf.dropna(subset=['lat', 'long', 'ExtremeShortTermDryStress_Summer_whole'])
+
+gdf_aggregated = gdf.groupby(['lat', 'long'], as_index=False).agg({
+    'ExtremeShortTermDryStress_Summer_whole': lambda x: round(x.mean(), 2)
+})
+
+df = pd.DataFrame(gdf_aggregated)
+
+fig = px.scatter_mapbox(df,
+                        lat='lat',
+                        lon='long',
+                        size='ExtremeShortTermDryStress_Summer_whole',
+                        color='ExtremeShortTermDryStress_Summer_whole',
+                        hover_name='ExtremeShortTermDryStress_Summer_whole',
+                        color_continuous_scale=px.colors.sequential.Reds,
+                        size_max=15,  
+                        zoom=12,  
+                        mapbox_style="open-street-map",
+                        title="Extreme Short Term Dry Stress on Soil Across Natural Bridges (2021-2024)")
+
+fig.update_layout(coloraxis_colorbar=dict(title='Dry Stress Index'))
+
+fig.update_traces(hovertemplate='Dry Stress Index: %{hovertext}')
+
+fig.update_layout(
+    autosize=True,  # Let Plotly determine the size automatically
+    margin=dict(l=0, r=0, t=50, b=0),  # Adjust the margins for better visibility of the title
+    width=1000,  # Set the width of the figure to 1200 pixels
+    height=700  # Set the height of the figure to 700 pixels
+)
+
+fig.show()
+
+```
+
+
+In comparison, below is a map showing the maximum summer temperatures across the park. The shading in this temperature map closely mirrors that of the extreme short-term dry stress map, indicating a strong correlation between these two variables. This suggests that areas experiencing higher maximum summer temperatures also tend to have higher dry stress indices. The data, collected over the period from 2021 to 2024, highlights this relationship clearly. The Western and Southern parts of the park, which are depicted in darker shades of orange on the temperature map, coincide with the regions showing the highest dry stress indices on the dry stress map. This correlation is crucial for understanding the environmental dynamics within the park.
+
+```{python}
+import pandas as pd
+import geopandas as gpd
+import plotly.express as px
+
+utah_shapefile = gpd.read_file('data/utah/tl_2016_49_cousub.shp')
+
+filtered_df = combined_df[(combined_df['year'] >= 2021) & (combined_df['year'] <= 2024)]
+
+gdf = gpd.GeoDataFrame(
+    filtered_df, geometry=gpd.points_from_xy(filtered_df.long, filtered_df.lat)
+)
+
+gdf.crs = utah_shapefile.crs
+
+gdf = gdf.dropna(subset=['lat', 'long', 'Tmax_Summer'])
+
+gdf_aggregated = gdf.groupby(['lat', 'long'], as_index=False).agg({
+    'Tmax_Summer': lambda x: round(x.mean(), 2)
+})
+
+df = pd.DataFrame(gdf_aggregated)
+
+fig = px.scatter_mapbox(df,
+                        lat='lat',
+                        lon='long',
+                        size='Tmax_Summer',
+                        color='Tmax_Summer',
+                        hover_name='Tmax_Summer',
+                        color_continuous_scale=px.colors.sequential.Oranges,
+                        size_max=15, 
+                        zoom=12,  
+                        mapbox_style="open-street-map",
+                        title="Maximum Summer Temperatures Across Natural Bridges (2021-2024)")
+
+
+fig.update_layout(coloraxis_colorbar=dict(title='Temperature (°C)'))
+
+fig.update_traces(hovertemplate='Temperature: %{hovertext}°C')
+
+fig.update_layout(
+    autosize=True,  
+    margin=dict(l=0, r=0, t=50, b=0),  
+    width=1000,  
+    height=700  
+)
+
+fig.show()
+
+```
+
 
 # Predictive Analysis
 
-# Conclusion
+## XGBoost
 
-hgjhg
+Using an XGBoost regression analysis, we aimed to build a predictive model for maximum summer temperatures. With this model, researchers and ecologists can use it to understand how to anticipate intense weather conditions and how they can take preventative mesaures to protect the nature and vegetation of the area.
+
+The below graph shows the input variables in the model and their associated importance in predicting maximum summer temperatures. The overall model had an **MSE of .024** , which is very low. This means that the predicted values were very close to the actual values. Overall, this means our model is performing well.
+
+Conclusions from this model:
+
+* Precipitation and Temperature: The top features, including PPT_Summer, PPT_Winter, T_Summer, and T_Winter, highlight the strong influence of precipitation and temperature variables on summer temperatures. This suggests that variations in precipitation levels during summer and winter months, along with corresponding temperature changes, significantly impact Tmax_Summer.
+
+* Seasonal Patterns: The prominence of seasonal variables (PPT_Summer, PPT_Winter, T_Summer, T_Winter) underscores the importance of seasonal patterns in temperature fluctuations. Understanding these seasonal dynamics can aid in climate analysis, resource management, and decision-making processes.
+
+Predictive models like this can be used in the future to help get a better understanding of how to best prepare for these events and create mitigation efforts.
+
+![](data/images/feature_importance.png)
+
+# Case Studies
+
+:::: {.columns}
+
+:::: {.column width="55%" style="padding:20px; position:sticky;top:100px;background-color:#648767"}
+
+::: {style="background-color: white; color: white; height: 300px; text-align: center; padding: 20px;"}
+![](data/images/scenic.jpg)
+:::
+::::
+
+:::: {.column width="10%"}
+::::
+
+:::: {.column width="35%"}
+Utah is undergoing significant climate change, with temperatures rising by about two degrees Fahrenheit over the past century. This warming trend is leading to earlier snowmelt in the spring and more frequent heat waves across the western United States. These changes are expected to result in decreased river flows, more frequent wildfires, and reduced agricultural productivity in Utah [@utah-climate].
+
+Human activities have significantly increased greenhouse gases like carbon dioxide, which have raised Earth's surface and lower atmosphere temperatures by about one degree in the last 50 years. This warming causes higher evaporation rates, increasing humidity and heavy rainfall in some regions while contributing to drought in others [@utah-climate].
+
+In Utah, these climate changes will likely increase water demand for irrigation as soils become drier, but the overall water supply is expected to decrease due to higher evaporation rates outpacing precipitation [@utah-climate].
+
+The below map shows the rising temperatures across the United States over the last century. It is clear the western states, including Utah, are experiencing the most drastic rising of temperature.
+
+![](data/images/climate-map.png)
+[@utah-climate]
+
+
+::::
+
+:::::
+
+
+
+
+# Conclusions/Recommendations
+
+Throughout our analysis, park management can take many preventative steps to ensure vitality for all vegetation in the park.
+
+Strategies to mitigate the impacts of extreme conditions can be developed based on this knowledge:
+
+Microclimate Management:
+
+* Implementing measures to moderate ground temperatures, such as creating shade with vegetation or artificial structures, can help reduce soil temperature and dry stress.
+
+Soil Moisture Retention:
+
+* Techniques like mulching, adding organic matter, and constructing water retention basins can improve soil moisture levels, mitigating the effects of high temperatures.
+
+Resilient Vegetation:
+
+* Planting drought-resistant and heat-tolerant plant species can help maintain vegetation cover and ecosystem stability in the face of rising temperatures.
+
+Monitoring and Early Warning Systems:
+
+* Establishing robust monitoring systems for both soil moisture and temperature can provide early warnings of extreme conditions, allowing for timely interventions.
+
+
+
